@@ -11,7 +11,7 @@ abstract class BuiltArticle implements Built<BuiltArticle, BuiltArticleBuilder> 
 
   String? get author;
   String get title;
-  String get description;
+  String? get description;
   String get url;
   String? get urlToImage;
   String get content;

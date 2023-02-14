@@ -1,10 +1,10 @@
-import 'package:built_collection/built_collection.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chopper/chopper.dart';
 import 'package:flutter/material.dart';
-import 'package:nayax_demo/core/data_models/built_articles_models/built_article.dart';
-import 'package:nayax_demo/core/service/articles_api_service.dart';
-import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+
+import '../core/data_models/built_articles_models/built_article.dart';
+import '../core/service/articles_data_manager.dart';
+
 
 class ArticlesListScreen extends StatefulWidget {
   const ArticlesListScreen({super.key});
@@ -14,8 +14,9 @@ class ArticlesListScreen extends StatefulWidget {
 }
 
 class _ArticlesListScreenState extends State<ArticlesListScreen> {
-  ///Manage data
-  BuiltList<BuiltArticle> _collectionData = BuiltList();
+
+  ///Data collection
+  List<BuiltArticle> _collectionData = [];
   bool _isLoading = false;
 
   set isLoading(bool value) {
@@ -26,45 +27,22 @@ class _ArticlesListScreenState extends State<ArticlesListScreen> {
 
   void _resetCollectionData() {
     setState(() {
-      _collectionData = BuiltList();
+      _collectionData = [];
     });
   }
 
   Future _refreshCollectionData() async {
+    //1. Update loading state
+    isLoading = true;
+
+    //2. Lets reset first
     _resetCollectionData();
-    _isLoading = true;
 
-    var articles = await _prepareDataCollection();
-    _isLoading = false;
+    //3. Fetch new data
+    _collectionData = await ArticlesDataManager().retrieveArticles();
 
-    if (articles.isNotEmpty) {
-      setState(() {
-        _collectionData = articles;
-      });
-    }
-  }
-
-
-  ///Data Collection
-  Future<BuiltList<BuiltArticle>> _prepareDataCollection() async {
-    BuiltList<BuiltArticle> articles = BuiltList();
-
-    await Future.wait([
-      getTeslaArticles().then((value) => articles += value),
-      //getAppleArticles().then((value) => articles += value),
-    ]);
-
-    return articles;
-  }
-
-  Future<BuiltList<BuiltArticle>> getTeslaArticles() async {
-    Response<BuiltList<BuiltArticle>> telsaArticle = await context.read<ArticlesApiService>().getArticles(q: 'tesla');
-    return telsaArticle.body ?? BuiltList();
-  }
-
-  Future<BuiltList<BuiltArticle>> getAppleArticles() async {
-    Response<BuiltList<BuiltArticle>> appleArticle = await context.read<ArticlesApiService>().getArticles(q: 'apple');
-    return appleArticle.body ?? BuiltList();
+    //4. Update loading state
+    isLoading = false;
   }
 
 
@@ -90,7 +68,7 @@ class _ArticlesListScreenState extends State<ArticlesListScreen> {
     );
   }
 
-  Widget _buildArticlesList(BuildContext context, BuiltList<BuiltArticle> articles) {
+  Widget _buildArticlesList(BuildContext context, List<BuiltArticle> articles) {
     if (articles.isEmpty && !_isLoading) {
       return Center(
           child: Column(
@@ -141,7 +119,7 @@ class _ArticlesListScreenState extends State<ArticlesListScreen> {
         isThreeLine: true,
         leading: _prepareImage(article.urlToImage),
         title: Text(article.title),
-        subtitle: Text(article.description),
+        subtitle: Text(article.description ?? article.content),
       ),
     );
   }

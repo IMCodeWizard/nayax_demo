@@ -22,9 +22,6 @@ class _$BuiltArticleSerializer implements StructuredSerializer<BuiltArticle> {
       'title',
       serializers.serialize(object.title,
           specifiedType: const FullType(String)),
-      'description',
-      serializers.serialize(object.description,
-          specifiedType: const FullType(String)),
       'url',
       serializers.serialize(object.url, specifiedType: const FullType(String)),
       'content',
@@ -42,6 +39,13 @@ class _$BuiltArticleSerializer implements StructuredSerializer<BuiltArticle> {
     if (value != null) {
       result
         ..add('author')
+        ..add(serializers.serialize(value,
+            specifiedType: const FullType(String)));
+    }
+    value = object.description;
+    if (value != null) {
+      result
+        ..add('description')
         ..add(serializers.serialize(value,
             specifiedType: const FullType(String)));
     }
@@ -77,7 +81,7 @@ class _$BuiltArticleSerializer implements StructuredSerializer<BuiltArticle> {
           break;
         case 'description':
           result.description = serializers.deserialize(value,
-              specifiedType: const FullType(String))! as String;
+              specifiedType: const FullType(String)) as String?;
           break;
         case 'url':
           result.url = serializers.deserialize(value,
@@ -113,7 +117,7 @@ class _$BuiltArticle extends BuiltArticle {
   @override
   final String title;
   @override
-  final String description;
+  final String? description;
   @override
   final String url;
   @override
@@ -131,7 +135,7 @@ class _$BuiltArticle extends BuiltArticle {
   _$BuiltArticle._(
       {this.author,
       required this.title,
-      required this.description,
+      this.description,
       required this.url,
       this.urlToImage,
       required this.content,
@@ -139,8 +143,6 @@ class _$BuiltArticle extends BuiltArticle {
       required this.source})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(title, r'BuiltArticle', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        description, r'BuiltArticle', 'description');
     BuiltValueNullFieldError.checkNotNull(url, r'BuiltArticle', 'url');
     BuiltValueNullFieldError.checkNotNull(content, r'BuiltArticle', 'content');
     BuiltValueNullFieldError.checkNotNull(
@@ -276,8 +278,7 @@ class BuiltArticleBuilder
               author: author,
               title: BuiltValueNullFieldError.checkNotNull(
                   title, r'BuiltArticle', 'title'),
-              description: BuiltValueNullFieldError.checkNotNull(
-                  description, r'BuiltArticle', 'description'),
+              description: description,
               url: BuiltValueNullFieldError.checkNotNull(
                   url, r'BuiltArticle', 'url'),
               urlToImage: urlToImage,
